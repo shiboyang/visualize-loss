@@ -15,15 +15,14 @@ test_dataset = torchvision.datasets.MNIST("./data", train=False,
                                           download=False)
 
 
-def get_dataset_loader(batch_size, train):
+def get_dataset_loader(batch_size, train, **kwargs):
     dataset = train_dataset if train else test_dataset
 
     return _data.DataLoader(dataset,
                             batch_size=batch_size,
                             shuffle=True,
-                            drop_last=True,
-                            num_workers=1,
-                            pin_memory=True)
+                            pin_memory=True,
+                            **kwargs)
 
 
 if __name__ == '__main__':
@@ -31,8 +30,8 @@ if __name__ == '__main__':
         batch = images.shape[0]
         for i in range(batch):
             img = images[i].view(28, 28, 1)
-            print(img.type)
-            plt.imshow(img, interpolation='nearest')
+            print(img.type())
+            plt.imshow(img)
             plt.title(label[i].item())
             plt.show()
         break

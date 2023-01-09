@@ -14,9 +14,9 @@ class Model(nn.Module):
         self.num_class = num_class
         self.feature = self._make_layers(num_layers)
 
-        self.visualized_linear = nn.Linear(28 * 28, 2, bias=False)
+        self.visualized_linear = nn.Linear(28 * 28, 2)
 
-        self.classifier = nn.Linear(2, self.num_class)
+        self.classifier = nn.Linear(2, self.num_class, bias=False)
 
         self.vis_linear_output = []
 

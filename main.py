@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from data import get_dataset_loader
 from model import Model
+from visualize import visualize_linear
 
 batch_size = 6000
 input_size = 28
@@ -22,6 +23,7 @@ log_interval = 10
 def train(train_loader, model, optimizer, loss_func, device, epoch):
     model.train()
     vis_linear_output = []
+    vis_linear_target = []
     for batch_idx, (data, target) in enumerate(train_loader, start=1):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -38,13 +40,11 @@ def train(train_loader, model, optimizer, loss_func, device, epoch):
                                                                            loss.item()))
         if epoch % 3 == 0:
             vis_linear_output.append(model.vis_linear_output)
+            vis_linear_target.append(target)
     if len(vis_linear_output) > 1:
         vis_data = torch.cat(vis_linear_output, 0)
-        x = vis_data[:, 0].tolist()
-        y = vis_data[:, 1].tolist()
-        plt.scatter(x, y)
-        plt.title("Train")
-        plt.show()
+        vis_target = torch.cat(vis_linear_target, 0)
+        visualize_linear(vis_data, vis_target, "Train")
 
 
 def test(test_loader, model, device, epoch):

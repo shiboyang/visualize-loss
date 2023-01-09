@@ -4,25 +4,23 @@
 # @File    : visualize.py
 # @Software: PyCharm
 import matplotlib.pyplot as plt
-import torch
+import matplotlib.colors as mcolors
 from torch import Tensor
+import torch
+
+COLORS = list(mcolors.TABLEAU_COLORS.values())
 
 
-def visualize_linear(data: Tensor, target: Tensor, title=""):
+def visualize_linear(data: Tensor, target: Tensor, classes, title=""):
     assert data.shape[0] == target.shape[0]
-    b = data.shape[0]
-    colors = torch.linspace(0, 1, b)
-    colors = colors[target].squeeze().tolist()
+    figure, ax = plt.subplots()
+    data = torch.cat([data, target.view(-1, 1)], dim=1)
+    for i in range(classes):
+        mask = data[:, 2] == i
+        x = data[mask][:, 0].tolist()
+        y = data[mask][:, 1].tolist()
+        ax.scatter(x, y, c=COLORS[i], label=str(i), marker=".")
 
-    x = data[:, 0].tolist()
-    y = data[:, 1].tolist()
-    plt.scatter(x, y, c=colors)
-    plt.title(title)
+    ax.set_title(title)
+    ax.legend()
     plt.show()
-
-
-if __name__ == '__main__':
-    b = 10
-    data = torch.randn((b, 2))
-    target = torch.randint(10, (b, 1))
-    visualize_linear(data, target)

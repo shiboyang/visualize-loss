@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 
 from data import get_dataset_loader
 from model import Model
@@ -18,6 +17,7 @@ input_size = 28
 learning_rate = 0.08
 epochs = 100
 log_interval = 10
+num_class = 10
 
 
 def train(train_loader, model, optimizer, loss_func, device, epoch):
@@ -44,7 +44,7 @@ def train(train_loader, model, optimizer, loss_func, device, epoch):
     if len(vis_linear_output) > 1:
         vis_data = torch.cat(vis_linear_output, 0)
         vis_target = torch.cat(vis_linear_target, 0)
-        visualize_linear(vis_data, vis_target, "Train")
+        visualize_linear(vis_data, vis_target, num_class, "Train")
 
 
 def test(test_loader, model, device, epoch):
@@ -52,6 +52,7 @@ def test(test_loader, model, device, epoch):
     total_loss = 0
     correct = 0
     vis_linear_output = []
+    vis_linear_target = []
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
@@ -63,6 +64,7 @@ def test(test_loader, model, device, epoch):
 
             if epoch % 10 == 0:
                 vis_linear_output.append(model.vis_linear_output)
+                vis_linear_target.append(target)
 
     num_data = len(test_loader.dataset)
     total_loss /= num_data
@@ -71,11 +73,8 @@ def test(test_loader, model, device, epoch):
     ))
     if len(vis_linear_output) > 1:
         vis_data = torch.cat(vis_linear_output, 0)
-        x = vis_data[:, 0].tolist()
-        y = vis_data[:, 1].tolist()
-        plt.scatter(x, y)
-        plt.title("Test")
-        plt.show()
+        vis_target = torch.cat(vis_linear_target, 0)
+        visualize_linear(vis_data, vis_target, num_class, "Test")
 
 
 def main():
@@ -83,7 +82,7 @@ def main():
     train_loader = get_dataset_loader(batch_size, True)
     test_loader = get_dataset_loader(batch_size, False)
 
-    model = Model(3, 28, 10).to(device)
+    model = Model(3, 28, num_class).to(device)
 
     cross_entropy_loss = nn.CrossEntropyLoss()
 

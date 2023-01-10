@@ -15,8 +15,8 @@ from loss import CrossEntropyLoss
 
 batch_size = 600
 input_size = 28
-learning_rate = 0.01
-epochs = 100
+learning_rate = 0.001
+epochs = 500
 log_interval = 10
 num_class = 10
 

@@ -11,10 +11,11 @@ import torch.nn.functional as F
 from data import get_dataset_loader
 from model import Model
 from visualize import visualize_linear
+from loss import CrossEntropyLoss
 
-batch_size = 6000
+batch_size = 600
 input_size = 28
-learning_rate = 0.08
+learning_rate = 0.01
 epochs = 100
 log_interval = 10
 num_class = 10
@@ -33,18 +34,21 @@ def train(train_loader, model, optimizer, loss_func, device, epoch):
         loss.backward()
         optimizer.step()
         if batch_idx % 10 == 0:
-            print("Train epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(epoch,
-                                                                           batch_idx * batch_size,
-                                                                           len(train_loader.dataset),
-                                                                           100.0 * batch_idx / len(train_loader),
-                                                                           loss.item()))
+            print("\rTrain epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(epoch,
+                                                                             batch_idx * batch_size,
+                                                                             len(train_loader.dataset),
+                                                                             100.0 * batch_idx / len(train_loader),
+                                                                             loss.item()), end="")
         if epoch % 3 == 0:
             vis_linear_output.append(model.vis_linear_output)
             vis_linear_target.append(target)
+
     if len(vis_linear_output) > 1:
         vis_data = torch.cat(vis_linear_output, 0)
         vis_target = torch.cat(vis_linear_target, 0)
         visualize_linear(vis_data, vis_target, num_class, "Train")
+
+    print("")
 
 
 def test(test_loader, model, device, epoch):
@@ -82,16 +86,17 @@ def main():
     train_loader = get_dataset_loader(batch_size, True)
     test_loader = get_dataset_loader(batch_size, False)
 
-    model = Model(3, 28, num_class).to(device)
+    model = Model(3, 28, num_class, device, use_l2=True, l2_scale=25).to(device)
 
-    cross_entropy_loss = nn.CrossEntropyLoss()
+    cross_entropy_loss = CrossEntropyLoss()
+    loss_func = cross_entropy_loss
 
     optimizer = optim.SGD(model.parameters(),
                           learning_rate,
                           0.9)
     for i in range(1, epochs + 1):
-        train(train_loader, model, optimizer, cross_entropy_loss, device, i)
-        test(test_loader, model, device, i)
+        train(train_loader, model, optimizer, loss_func, device, i)
+        # test(test_loader, model, device, i)
 
 
 if __name__ == '__main__':

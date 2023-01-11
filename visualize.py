@@ -11,7 +11,7 @@ import torch
 COLORS = list(mcolors.TABLEAU_COLORS.values())
 
 
-def visualize_linear(data: Tensor, target: Tensor, classes, title=""):
+def visualize_feature(data: Tensor, target: Tensor, classes, title=""):
     assert data.shape[0] == target.shape[0]
     figure, ax = plt.subplots()
     data = torch.cat([data, target.view(-1, 1)], dim=1)

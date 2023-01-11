@@ -29,7 +29,7 @@ class Model(nn.Module):
         self.vis_linear_output = out.clone()
 
         if self.use_l2:
-            out = out / out.square().sum(dim=1).sqrt().view(-1, 1) * self.l2_scale
+            out = out / torch.sqrt((out ** 2).sum(dim=1)).view(-1, 1) * self.l2_scale
 
         out = self.classifier(out)
 

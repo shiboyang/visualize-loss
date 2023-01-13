@@ -8,6 +8,15 @@ from torch import nn, Tensor
 from collections import OrderedDict
 
 
+def _make_linear_layer(num_layers, input_size, output_size):
+    layers = OrderedDict()
+    for i in range(num_layers):
+        layers[f"linear{i}"] = nn.Linear(input_size ** 2, output_size ** 2, bias=True)
+        layers[f"relu{i}"] = nn.ReLU(True)
+
+    return nn.Sequential(layers)
+
+
 class Model(nn.Module):
     def __init__(self, num_layers, input_size, num_class, device, use_l2=False, l2_scale=25):
         super(Model, self).__init__()
@@ -35,10 +44,32 @@ class Model(nn.Module):
 
         return out
 
-    def _make_layers(self, num_layers):
-        layers = OrderedDict()
-        for i in range(num_layers):
-            layers[f"linear{i}"] = nn.Linear(self.input_size * self.input_size, 28 * 28)
-            layers[f"relu{i}"] = nn.ReLU(True)
 
-        return nn.Sequential(layers)
+class FeatureExtract(nn.Module):
+    def __init__(self, num_layers, input_size, output_size, use_l2norm, l2_scale, device):
+        super(FeatureExtract, self).__init__()
+        self.feature = _make_linear_layer(num_layers, input_size, input_size)
+        self.visualized_linear = nn.Linear(input_size ** 2, output_size, bias=False)
+        self.vis_output = None
+        self.use_l2norm = use_l2norm
+        self.l2_scale = torch.as_tensor(l2_scale, device=device)
+
+    def forward(self, inputs: Tensor):
+        out = self.feature(inputs)
+        out = self.visualized_linear(out)
+        self.vis_output = out.clone()
+        if self.use_l2norm:
+            out = out / torch.linalg.norm(out, dim=1, keepdim=True) * self.l2_scale
+
+        return out
+
+
+class Classifier(nn.Module):
+    def __init__(self, input_size, num_class):
+        super(Classifier, self).__init__()
+        self.classifier = nn.Linear(input_size, num_class, bias=False)
+
+    def forward(self, inputs):
+        torch.linalg.norm(self.classifier.weight, dim=1)
+        return self.classifier(inputs)
+

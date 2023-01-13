@@ -11,11 +11,11 @@ import torch
 COLORS = list(mcolors.TABLEAU_COLORS.values())
 
 
-def visualize_feature(data: Tensor, target: Tensor, classes, title=""):
+def visualize_feature(data: Tensor, target: Tensor, num_class, title=""):
     assert data.shape[0] == target.shape[0]
     figure, ax = plt.subplots()
     data = torch.cat([data, target.view(-1, 1)], dim=1)
-    for i in range(classes):
+    for i in range(num_class):
         mask = data[:, 2] == i
         x = data[mask][:, 0].tolist()
         y = data[mask][:, 1].tolist()

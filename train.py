@@ -5,6 +5,9 @@
 # @Software: PyCharm
 import torch
 from visualize import visualize_feature
+from loss import RingLoss
+
+ring_loss = RingLoss(10, 1)
 
 
 def train(train_loader, model, optimizer, loss_func, device, epoch, batch_size, num_class):
